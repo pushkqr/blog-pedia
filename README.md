@@ -26,8 +26,10 @@ pip install -r requirements.txt
 
 3.Set up your email credentials in the main.py file:
 
+```bash
 EMAIL_USER = "site_owner@gmail.com"
 EMAIL_PASSWORD = "your_email_password"
+```
 
 4.Run the Flask application:
 
