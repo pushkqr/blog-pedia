@@ -16,11 +16,13 @@ Blog-pedia is a simple blog web application built with Flask, SQLAlchemy, and Bo
 
 ```bash
 git clone https://github.com/pushkqr/blog-pedia.git
+```
 
 2.Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
 
 3.Set up your email credentials in the main.py file:
 
@@ -31,6 +33,7 @@ EMAIL_PASSWORD = "your_email_password"
 
 ```bash
 python main.py
+```
 
 5.Access the application in your web browser at http://localhost:5000.
 
