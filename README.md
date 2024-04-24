@@ -40,11 +40,11 @@ python main.py
 5.Access the application in your web browser at http://localhost:5000.
 
 ## Usage
--Register a new account or log in with existing credentials.
--Create new blog posts by navigating to the "New Post" page.
--View all existing posts on the homepage.
--Click on a post to view its details, leave comments, and edit or delete it if you're the author or an admin.
--Use the contact form to send inquiries to the site owner.
+- Register a new account or log in with existing credentials.
+- Create new blog posts by navigating to the "New Post" page.
+- View all existing posts on the homepage.
+- Click on a post to view its details, leave comments, and edit or delete it if you're the author or an admin.
+- Use the contact form to send inquiries to the site owner.
 
 ## Credits
 This project is based on the Clean Blog Bootstrap Template by Start Bootstrap.
