@@ -186,7 +186,7 @@ def show_post(post_id):
 
 
 @app.route("/new-post", methods=["GET", "POST"])
-@admin_only
+@login_required
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -200,36 +200,44 @@ def add_new_post():
         )
         db.session.add(new_post)
         db.session.commit()
+        flash("New post created successfully!")
         return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form)
 
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
-@admin_only
+@login_required
 def edit_post(post_id):
     post = db.get_or_404(BlogPost, post_id)
+
+    if current_user.id != post.author_id and current_user.id != 1:
+        flash("You do not have permission to edit this post.")
+        return redirect(url_for('get_all_posts'))
+
     edit_form = CreatePostForm(
         title=post.title,
         subtitle=post.subtitle,
         img_url=post.img_url,
-        author=post.author,
         body=post.body
     )
     if edit_form.validate_on_submit():
         post.title = edit_form.title.data
         post.subtitle = edit_form.subtitle.data
         post.img_url = edit_form.img_url.data
-        post.author = current_user
         post.body = edit_form.body.data
         db.session.commit()
+        flash("Post updated successfully.")
         return redirect(url_for("show_post", post_id=post.id))
+
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
 
 @app.route("/delete/<int:post_id>")
-@admin_only
+@login_required
 def delete_post(post_id):
     post_to_delete = db.get_or_404(BlogPost, post_id)
+    if current_user.id != post_to_delete.author_id and not current_user.id == 1:
+        abort(403)
     db.session.delete(post_to_delete)
     db.session.commit()
     return redirect(url_for('get_all_posts'))
