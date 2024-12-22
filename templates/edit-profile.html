@@ -1,0 +1,211 @@
+{% include "header.html" %} {% block content %}
+
+<style>
+/* Update these navbar styles in both templates */
+#mainNav {
+    background-color: #212529 !important; /* Force dark background initially */
+    position: fixed;
+    width: 100%;
+    transition: transform 0.3s ease-in-out;
+}
+
+#mainNav .navbar-brand,
+#mainNav .nav-link,
+#mainNav .navbar-toggler {
+    color: #fff !important; /* Force light text initially */
+}
+
+/* Search input styles for dark navbar */
+#mainNav .search-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+#mainNav .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#mainNav .search-button {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Styles for when navbar becomes fixed white */
+#mainNav.is-fixed.is-visible {
+    background-color: #fff !important;
+}
+
+#mainNav.is-fixed.is-visible .navbar-brand,
+#mainNav.is-fixed.is-visible .nav-link,
+#mainNav.is-fixed.is-visible .navbar-toggler {
+    color: #212529 !important;
+}
+
+#mainNav.is-fixed.is-visible .search-input {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: #212529;
+}
+
+#mainNav.is-fixed.is-visible .search-input::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+#mainNav.is-fixed.is-visible .search-button {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.edit-profile-container {
+    margin-top: 100px;
+    padding: 2rem 0;
+}
+
+.edit-profile-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    padding: 0.75rem;
+}
+
+.form-control:focus {
+    border-color: #0085A1;
+    box-shadow: 0 0 0 0.2rem rgba(0,133,161,0.25);
+}
+
+textarea.form-control {
+    min-height: 120px;
+}
+
+.alert {
+    margin-bottom: 1.5rem;
+}
+
+.btn-save {
+    background-color: #0085A1;
+    color: white;
+    padding: 0.5rem 2rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-save:hover {
+    background-color: #006d83;
+    color: white;
+}
+
+.btn-cancel {
+    margin-left: 1rem;
+    color: #6c757d;
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    color: #495057;
+    text-decoration: underline;
+}
+
+.section-title {
+    color: #212529;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #0085A1;
+}
+
+/* Form validation styles */
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+</style>
+
+<div class="container edit-profile-container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="edit-profile-card">
+                <h2 class="section-title">Edit Profile</h2>
+
+                <div class="text-center mb-4">
+                    <img src="{{ current_user.email | gravatar(size=100) }}"
+                         alt="Profile Picture"
+                         class="profile-avatar">
+                    <p class="text-muted">Profile picture is handled through Gravatar</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('edit_profile') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            {% for error in form.name.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.bio.label(class="form-label") }}
+                        {{ form.bio(class="form-control" + (" is-invalid" if form.bio.errors else "")) }}
+                        {% if form.bio.errors %}
+                            {% for error in form.bio.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                        <small class="text-muted">Maximum 500 characters</small>
+                    </div>
+
+                    <div class="form-group d-flex align-items-center">
+                        {{ form.submit(class="btn btn-save") }}
+                        <a href="{{ url_for('user_profile', user_id=current_user.id) }}"
+                           class="btn-cancel">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const mainNav = document.getElementById('mainNav');
+
+    window.addEventListener('scroll', function() {
+        const currentTop = document.body.getBoundingClientRect().top * -1;
+        if (currentTop > 100) {
+            mainNav.classList.add('is-fixed', 'is-visible');
+        } else {
+            mainNav.classList.remove('is-fixed', 'is-visible');
+        }
+    });
+});
+</script>
+
+{% include "footer.html" %} {% endblock %}

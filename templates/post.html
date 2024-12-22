@@ -1,8 +1,138 @@
 {% include "header.html" %}
-
 {% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+<style>
+.meta {
+    font-size: 0.75rem;
+    font-family: 'Lora', 'Times New Roman', serif;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.2;
+}
 
-<!-- Page Header-->
+.meta a {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.meta a:hover {
+    text-decoration: underline;
+    color: #fff;
+}
+
+.meta-item {
+    display: inline;
+    margin-right: 1rem;
+}
+
+.meta-divider {
+    margin: 0 0.5rem;
+    opacity: 0.6;
+}
+
+.post-tags {
+    margin: 2rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.post-tags a {
+    color: #0085A1;
+    text-decoration: none;
+    margin-right: 0.5rem;
+}
+
+.post-tags a:hover {
+    text-decoration: underline;
+    color: #005670;
+}
+
+.comments-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.comments-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #212529;
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.comment-item {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.comment-avatar {
+    margin-right: 1rem;
+}
+
+.comment-avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.commenter-name {
+    font-weight: 600;
+    color: #495057;
+}
+
+.comment-body {
+    color: #212529;
+    line-height: 1.6;
+}
+
+.comment-form {
+    margin-top: 3rem;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.comment-form label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.comment-form .form-control {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+.comment-form .btn-primary {
+    background-color: #0085A1;
+    border-color: #0085A1;
+    padding: 0.5rem 1.5rem;
+    margin-top: 1rem;
+}
+
+.comment-form .btn-primary:hover {
+    background-color: #005670;
+    border-color: #005670;
+}
+</style>
+
 <header class="masthead" style="background-image: url('{{post.img_url}}')">
   <div class="container position-relative px-4 px-lg-5">
     <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -10,10 +140,14 @@
         <div class="post-heading">
           <h1>{{ post.title }}</h1>
           <h2 class="subheading">{{ post.subtitle }}</h2>
-          <span class="meta"
-            >Posted by
-            <a href="#">{{ post.author.name }}</a>
-            on {{ post.date }}
+          <span class="meta">
+            <span class="meta-item">By <a href="{{url_for('user_profile', user_id=post.author.id)}}">{{ post.author.name }}</a></span>
+            <span class="meta-divider">•</span>
+            <span class="meta-item">{{ post.date }}</span>
+            {% if post.category %}
+              <span class="meta-divider">•</span>
+              <span class="meta-item"><a href="{{ url_for('show_category', category_id=post.category.id) }}">{{ post.category.name }}</a></span>
+            {% endif %}
           </span>
         </div>
       </div>
@@ -21,42 +155,55 @@
   </div>
 </header>
 
-<!-- Post Content -->
 <article>
   <div class="container px-4 px-lg-5">
     <div class="row gx-4 gx-lg-5 justify-content-center">
       <div class="col-md-10 col-lg-8 col-xl-7">
         {{ post.body|safe }}
+
         {% if admin %}
         <div class="d-flex justify-content-end mb-4">
-          <a
-            class="btn btn-primary float-right"
-            href="{{url_for('edit_post', post_id=post.id)}}"
-            >Edit Post</a
-          >
+          <a class="btn btn-primary float-right" href="{{url_for('edit_post', post_id=post.id)}}">Edit Post</a>
         </div>
         {% endif %}
 
+        {% if post.tags %}
+        <div class="post-tags">
+          <i class="fas fa-tags"></i> Tags:
+          {% for post_tag in post.tags %}
+            <a href="{{ url_for('show_tag', tag_id=post_tag.tag.id) }}">{{ post_tag.tag.name }}</a>{% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
 
-        <div class="comment">
-          <ul class="commentList">
+        <div class="comments-section">
+          <h3 class="comments-title">Comments</h3>
+          <ul class="comment-list">
             {% for comment in comments %}
-            <li>
-              <div class="commenterImage">
-                <img src="{{ comment.author.email | gravatar}}" />
+            <li class="comment-item">
+              <div class="comment-header">
+                <div class="comment-avatar">
+                  <img src="{{ comment.author.email | gravatar }}" alt="{{ comment.author.name }}" />
+                </div>
+                <div class="comment-meta">
+                  <span class="commenter-name">{{ comment.author.name }}</span>
+                </div>
               </div>
-              <div class="commentText">
-                <p>{{ comment.text }}</p>
-                <span class="date sub-text">{{ comment.author.name }}</span>
+              <div class="comment-body">
+                {{ comment.text | safe }}
               </div>
             </li>
             {% endfor %}
           </ul>
-          {{ render_form(form) }}
+
+          <div class="comment-form">
+            {{ render_form(form) }}
+          </div>
         </div>
+
       </div>
     </div>
   </div>
 </article>
 
-{% include "footer.html" %}
+{% include "footer.html" %} {% endblock %}

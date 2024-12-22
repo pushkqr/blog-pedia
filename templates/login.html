@@ -20,19 +20,10 @@ include "header.html" %}
 
 <main class="mb-4">
   <div class="container">
-    <div class="row">
-      {% with messages = get_flashed_messages() %}
-        {% for message in messages %}
-          {% if message%}
-          <p align="center" style="color: red;">{{message}}</p>
-          {%endif%}
-        {% endfor %}
-      {% endwith %}
       <div class="col-lg-8 col-md-10 mx-auto">
         {{ render_form(form) }}
       </div>
     </div>
-  </div>
 </main>
 
 {% include "footer.html" %} {% endblock %}

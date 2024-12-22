@@ -1,52 +1,134 @@
-{% include "header.html" %}
+{% include "header.html" %} {% block content %}
 
-<header
-  class="masthead"
-  style="background-image: url('../static/assets/img/home-bg.jpg')"
->
-  <div class="container position-relative px-4 px-lg-5">
-    <div class="row gx-4 gx-lg-5 justify-content-center">
-      <div class="col-md-10 col-lg-8 col-xl-7">
-        <div class="site-heading">
-          <h1>Blog-pedia</h1>
-          <span class="subheading">A blog prototype built by pushkqr.</span>
-        </div>
-      </div>
-    </div>
-  </div>
+<style>
+.search-results-summary {
+   background-color: #f8f9fa;
+   padding: 1rem;
+   border-radius: 8px;
+   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.search-results-summary p {
+   margin: 0;
+   font-size: 0.9rem;
+}
+
+.post-meta a {
+   color: #0085A1;
+   text-decoration: none;
+   transition: color 0.2s;
+}
+
+.post-meta a:hover {
+   color: #005670;
+   text-decoration: underline;
+}
+
+.small {
+   font-size: 0.875em;
+   opacity: 0.8;
+}
+
+.text-danger {
+   color: #dc3545;
+   text-decoration: none;
+}
+
+.text-danger:hover {
+   color: #a71d2a;
+}
+
+.ms-2 {
+   margin-left: 0.5rem;
+}
+</style>
+
+<header class="masthead" style="background-image: url('../static/assets/img/home-bg.jpg')">
+ <div class="container position-relative px-4 px-lg-5">
+   <div class="row gx-4 gx-lg-5 justify-content-center">
+     <div class="col-md-10 col-lg-8 col-xl-7">
+       <div class="site-heading">
+         {% if title %}
+           <h1>{{ title }}</h1>
+           <span class="subheading">
+             <a href="{{ url_for('get_all_posts') }}" class="back-link">← Back to all posts</a>
+           </span>
+         {% else %}
+           <h1>Blog-pedia</h1>
+           <span class="subheading">A blog prototype built by pushkqr.</span>
+         {% endif %}
+       </div>
+     </div>
+   </div>
+ </div>
 </header>
-<div class="container px-4 px-lg-5">
-  <div class="row gx-4 gx-lg-5 justify-content-center">
-    <div class="col-md-10 col-lg-8 col-xl-7">
-      {% for post in all_posts %}
-      <div class="post-preview">
-        <a href="{{ url_for('show_post', post_id=post.id) }}">
-          <h2 class="post-title">{{ post.title }}</h2>
-          <h3 class="post-subtitle">{{ post.subtitle }}</h3>
-        </a>
-        <p class="post-meta">
-          Posted by
-          <a href="#">{{post.author.name}}</a>
-          on {{post.date}}
-          {% if current_user.is_authenticated and (admin or post.author.id == current_user.id): %}
-          <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
-          {% endif %}
-        </p>
-      </div>
-      <hr class="my-4" />
-      {% endfor %}
 
-      {% if current_user.is_authenticated: %}
-      <div class="d-flex justify-content-end mb-4">
-        <a
-          class="btn btn-primary float-right"
-          href="{{url_for('add_new_post')}}"
-          >Create New Post</a
-        >
-      </div>
-      {% endif %}
-    </div>
-  </div>
+{% if search_query and results_count %}
+<div class="container px-4 px-lg-5 my-4">
+ <div class="row gx-4 gx-lg-5 justify-content-center">
+   <div class="col-md-10 col-lg-8 col-xl-7">
+     <div class="search-results-summary">
+       <p class="text-muted mb-4">
+         Found {{ results_count.total }} result{% if results_count.total != 1 %}s{% endif %}:
+         {% if results_count.titles > 0 %}{{ results_count.titles }} in titles{% endif %}
+         {% if results_count.categories > 0 %}{% if results_count.titles > 0 %}, {% endif %}{{ results_count.categories }} in categories{% endif %}
+         {% if results_count.authors > 0 %}{% if results_count.titles > 0 or results_count.categories > 0 %}, {% endif %}{{ results_count.authors }} by author name{% endif %}
+         {% if results_count.tags > 0 %}{% if results_count.titles > 0 or results_count.categories > 0 or results_count.authors > 0 %}, {% endif %}{{ results_count.tags }} in tags{% endif %}
+       </p>
+     </div>
+   </div>
+ </div>
+</div>
+{% endif %}
+
+<div class="container px-4 px-lg-5">
+ <div class="row gx-4 gx-lg-5 justify-content-center">
+   <div class="col-md-10 col-lg-8 col-xl-7">
+     {% if not all_posts %}
+       <div class="text-center my-5">
+         <h3>No posts found</h3>
+         {% if title %}
+           <p>There are no posts matching your search criteria.</p>
+         {% endif %}
+       </div>
+     {% endif %}
+
+     {% for post in all_posts %}
+     <div class="post-preview">
+       <a href="{{ url_for('show_post', post_id=post.id) }}">
+         <h2 class="post-title">{{ post.title }}</h2>
+         <h3 class="post-subtitle">{{ post.subtitle }}</h3>
+       </a>
+       <p class="post-meta">
+         Posted by
+         <a href="{{url_for('user_profile', user_id=post.author.id)}}">{{post.author.name}}</a>
+         on {{post.date}}
+         {% if post.category %}
+          • <a href="{{ url_for('show_category', category_id=post.category.id) }}">{{ post.category.name }}</a>
+         {% endif %}
+         {% if current_user.is_authenticated and (admin or post.author.id == current_user.id): %}
+         <a href="{{url_for('delete_post', post_id=post.id) }}" class="text-danger ms-2">✘</a>
+         {% endif %}
+       </p>
+       {% if post.tags %}
+       <p class="post-meta small">
+         <i class="fas fa-tags"></i>
+         {% for post_tag in post.tags %}
+           <a href="{{ url_for('show_tag', tag_id=post_tag.tag.id) }}">{{ post_tag.tag.name }}</a>{% if not loop.last %}, {% endif %}
+         {% endfor %}
+       </p>
+       {% endif %}
+     </div>
+     <hr class="my-4" />
+     {% endfor %}
+
+     {% if current_user.is_authenticated: %}
+     <div class="d-flex justify-content-end mb-4">
+       <a class="btn btn-primary float-right" href="{{url_for('add_new_post')}}">Create New Post</a>
+     </div>
+     {% endif %}
+   </div>
+ </div>
 </div>
 
-{% include "footer.html" %}
+{% include "footer.html" %} {% endblock %}
