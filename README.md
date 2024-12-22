@@ -100,4 +100,4 @@ Contributions are welcome! Please feel free to:
 - Help with documentation
 
 ## Deployment
-The application is currently deployed on Railway. Visit [Blog-pedia](blog-pedia.up.railway.app) to see it in action.
+The application is currently deployed on Railway. Visit [Blog-pedia](https://blog-pedia.up.railway.app) to see it in action.
